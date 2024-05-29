@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sintesi Proteica</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+        }
+
+        p {
+            margin-bottom: 20px;
+        }
+
+        #dna-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        #btn-translate {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        #legend-btn {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 5px;
+            margin-bottom: 20px;
+            float: right;
+        }
+
+        #protein-output,
+        #rna-output,
+        #complement-output,
+        #legend-output {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #protein-output {
+            background-color: #c3e6cb; /* Verde per la proteina */
+            color: #155724;
+        }
+
+        #rna-output {
+            background-color: #bee5eb; /* Blu per l'RNA */
+            color: #0c5460;
+        }
+
+        #complement-output {
+            background-color: #f8d7da; /* Rosso per il complementare */
+            color: #721c24;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Sintesi Proteica</h1>
+        <p>Inserisci la sequenza di DNA:</p>
+        <textarea id="dna-input" rows="4" placeholder="Inserisci la sequenza di DNA qui..."></textarea>
+        <button id="btn-translate">Traduci in Proteina e Trascrivi in RNA</button>
+        <div id="protein-output"></div>
+        <div id="rna-output"></div>
+        <div id="complement-output"></div>
+        <button id="legend-btn">Legenda amminoacidi</button>
+        <div id="legend-output"></div>
+    </div>
+
+    <script>
+        document.getElementById('btn-translate').addEventListener('click', function () {
+            var dnaSequence = document.getElementById('dna-input').value.toUpperCase();
+            if (dnaSequence.length % 3 !== 0) {
+                alert("La lunghezza della sequenza di DNA deve essere un multiplo di tre.");
+                return;
+            }
+            var protein = translateDNAtoProtein(dnaSequence);
+            var rna = transcribeDNAtoRNA(dnaSequence);
+            var complement = getComplementSequence(dnaSequence);
+            document.getElementById('protein-output').innerText = "Proteina: " + protein;
+            document.getElementById('rna-output').innerText = "RNA: " + rna;
+            document.getElementById('complement-output').innerText = "Sequenza Complementare: " + complement;
+        });
+
+        function translateDNAtoProtein(dnaSequence) {
+            var codonTable = {
+                'TTT': 'F', 'TTC': 'F', 'TTA': 'L', 'TTG': 'L',
+                'CTT': 'L', 'CTC': 'L', 'CTA': 'L', 'CTG': 'L',
+                'ATT': 'I', 'ATC': 'I', 'ATA': 'I', 'ATG': 'M',
+                'GTT': 'V', 'GTC': 'V', 'GTA': 'V', 'GTG': 'V',
+                'TCT': 'S', 'TCC': 'S', 'TCA': 'S', 'TCG': 'S',
+                'CCT': 'P', 'CCC': 'P', 'CCA': 'P', 'CCG': 'P',
+                'ACT': 'T', 'ACC': 'T', 'ACA': 'T', 'ACG': 'T',
+                'GCT': 'A', 'GCC': 'A', 'GCA': 'A', 'GCG': 'A',
+                'TAT': 'Y', 'TAC': 'Y', 'TAA': '*', 'TAG': '*',
+                'CAT': 'H', 'CAC': 'H', 'CAA': 'Q', 'CAG': 'Q',
+                'AAT': 'N', 'AAC': 'N', 'AAA': 'K', 'AAG': 'K',
+                'GAT': 'D', 'GAC': 'D', 'GAA': 'E', 'GAG': 'E',
+                'TGT': 'C', 'TGC': 'C', 'TGA': '*', 'TGG': 'W',
+                'CGT': 'R', 'CGC': 'R', 'CGA': 'R', 'CGG': 'R',
+                'AGT': 'S', 'AGC': 'S', 'AGA': 'R', 'AGG': 'R',
+                'GGT': 'G', 'GGC': 'G', 'GGA': 'G', 'GGG': 'G'
+            };
+
+            var proteinSequence = '';
+            for (var i = 0; i < dnaSequence.length; i += 3) {
+                var codon = dnaSequence.substr(i, 3);
+                if (codon.length === 3 && codon in codonTable) {
+                    proteinSequence += codonTable[codon];
+                } else {
+                    proteinSequence += '?';
+                }
+            }
+            return proteinSequence;
+        }
+
+        function transcribeDNAtoRNA(dnaSequence) {
+            return dnaSequence.replace(/T/g, 'U');
+        }
+
+        document.getElementById('legend-btn').addEventListener('click', function () {
+            alert("Legenda amminoacidi:\n" +
+                "A = Alanina\n" +
+                "R = Arginina\n" +
+                "N = Asparagina\n" +
+                "D = Acido aspartico\n" +
+                "C = Cisteina\n" +
+                "E = Acido glutammico\n" +
+                "Q = Glutammina\n" +
+                "G = Glicina\n" +
+                "H = Istidina\n" +
+                "I = Isoleucina\n" +
+                "L = Leucina\n" +
+                "K = Lisina\n" +
+                "M = Metionina\n" +
+                "F = Fenilalanina\n" +
+                "P = Proline\n" +
+                "S = Serina\n" +
+                "T = Treonina\n" +
+                "W = Triptofano\n" +
+                "Y = Tirosina\n" +
+                "V = Valina\n" +
+                "* = Terminatore (codone di stop)");
+        });
+
+        function getComplementSequence(dnaSequence) {
+            var complement = '';
+            for (var i = 0; i < dnaSequence.length; i++) {
+                switch (dnaSequence[i]) {
+                    case 'A':
+                        complement += 'T';
+                        break;
+                    case 'T':
+                        complement += 'A';
+                        break;
+                    case 'C':
+                        complement += 'G';
+                        break;
+                    case 'G':
+                        complement += 'C';
+                        break;
+                    default:
+                        complement += '?';
+                        break;
+                }
+            }
+            return complement;
+        }
+    </script>
+
+</body>
+
+</html>
